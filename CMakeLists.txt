@@ -1,18 +1,20 @@
 cmake_minimum_required(VERSION 3.8)
 project(fast_lio)
 
+option(USE_LIVOX "Build with Livox driver support" OFF)
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
- ADD_COMPILE_OPTIONS(-std=c++17) 
- ADD_COMPILE_OPTIONS(-std=c++17) 
- set(CMAKE_CXX_FLAGS "-std=c++17 -O3") 
-  
- add_definitions(-DROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/\") 
-  
- set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fexceptions") 
- set(CMAKE_CXX_STANDARD 17) 
+ ADD_COMPILE_OPTIONS(-std=c++17)
+ ADD_COMPILE_OPTIONS(-std=c++17)
+ set(CMAKE_CXX_FLAGS "-std=c++17 -O3")
+
+ add_definitions(-DROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/\")
+
+ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fexceptions")
+ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread -std=c++0x -std=c++14 -fexceptions")
@@ -59,7 +61,9 @@ find_package(std_srvs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(pcl_conversions REQUIRED)
-find_package(livox_ros_driver2 REQUIRED)
+if(USE_LIVOX)
+  find_package(livox_ros_driver2 REQUIRED)
+endif()
 find_package(rosidl_default_generators REQUIRED)
 
 set(dependencies
@@ -73,8 +77,11 @@ set(dependencies
   visualization_msgs
   pcl_ros
   pcl_conversions
-  livox_ros_driver2
 )
+
+if(USE_LIVOX)
+  list(APPEND dependencies livox_ros_driver2)
+endif()
 
 # Thirdparty libraries
 find_package(Eigen3 REQUIRED)
@@ -93,6 +100,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 ament_export_dependencies(rosidl_default_runtime)
 
 add_executable(fastlio_mapping src/laserMapping.cpp include/ikd-Tree/ikd_Tree.cpp src/preprocess.cpp)
+if(USE_LIVOX)
+  target_compile_definitions(fastlio_mapping PRIVATE USE_LIVOX)
+endif()
 target_include_directories(fastlio_mapping PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
