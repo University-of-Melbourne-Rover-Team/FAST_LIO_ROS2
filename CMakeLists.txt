@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(fast_lio)
 
 option(USE_LIVOX "Build with Livox driver support" OFF)
